@@ -1,0 +1,100 @@
+---
+title: "時系列データの異常検知の例"
+output: html_document
+---
+
+本ドキュメントでは、
+
+井出剛「入門 機械学習による異常検知」コロナ社 7章 時系列データの異常検知
+
+で示されている、時系列データの異常検知の例のデータセットを示す。
+
+
+```{r, include=FALSE}
+library(dplyr)
+library(ggplot2)
+```
+
+# (a) 外れ値型
+
+```{r}
+summary(rivers)
+```
+
+```{r}
+df_river <- data.frame(c(1:length(rivers)), rivers)
+colnames(df_river) <- c("idx", "length")
+head(df_river)
+```
+
+
+```{r}
+ggplot(
+  df_river,
+  aes(
+    x = idx,
+    y = length
+  )
+) + geom_line()
+```
+
+
+```{r}
+ggplot(df_river,aes(x=length)) + geom_histogram()
+```
+
+
+# (b) 逸脱型
+
+TODO
+
+
+# (c) 変化点型(周波数変化データ)
+
+```{r}
+set.seed(1)
+tt <- 0.1
+x1 <- seq(0,10,by=tt)
+x2 <- seq(10.1,20,by=tt)
+x3 <- seq(20.2,30,by=tt)
+y1 <- sin(pi*x1) + rnorm(length(x1), sd=0.07)
+y2 <- sin(2*pi*x2) + rnorm(length(x2), sd=0.07)
+y3 <- sin(pi*x3) + rnorm(length(x3), sd=0.07)
+xi <- c(y1,y2,y3)
+df_xi <- data.frame(c(1:length(xi)), xi)
+colnames(df_xi)=c("idx", "val")
+head(df_xi)
+```
+
+
+
+```{r}
+ggplot(
+  data.frame(df_xi),
+  aes(
+    x = idx,
+    y = val
+  )
+) + geom_line()
+```
+
+
+# (d) 複合型(心電図データ)
+
+心電図データはこちらからダウンロード
+https://www.cs.ucr.edu/~eamonn/discords/
+
+```{r}
+df_ecg <- read.table(file="qtdbsel102.txt")
+head(df_ecg)
+```
+
+```{r}
+ggplot(
+  df_ecg %>% dplyr::filter(V1>215 & V1<221),
+  aes(
+    x = V1,
+    y = V2
+  )
+) + geom_line()
+```
