@@ -1,6 +1,6 @@
 ---
 title: "時系列データの異常検知の例"
-output: html_document
+output: md_document
 ---
 
 本ドキュメントでは、
