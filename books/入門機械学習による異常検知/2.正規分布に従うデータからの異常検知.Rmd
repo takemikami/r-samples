@@ -1,0 +1,85 @@
+---
+title: "正規分布に従うデータからの異常検知"
+output: html_document
+---
+
+ここでは、自身の学習用に以下の書籍に関連するRコードを記載しています
+井出剛「入門 機械学習による異常検知」コロナ社 2章 正規分布に従うデータからの異常検知
+
+# 2.正規分布に従うデータからの異常検知
+
+## 2.2 1変数正規分布に基づく異常検知
+
+実行例2.1 p24
+
+```{r}
+install.packages("car")
+```
+
+```{r}
+library(car)
+```
+
+```{r}
+data(Davis)
+head(Davis)
+```
+
+```{r}
+hist(Davis$weight, xlim=c(35,105), breaks=14)
+```
+
+実行例2.2 p24
+
+```{r}
+mu <- mean(Davis$weight) #標本平均
+s2 <- mean((Davis$weight-mu)^2) #標本分散
+c(mu,s2)
+```
+
+
+実行例2.3 p25
+
+```{r}
+a <- (Davis$weight-mu)^2/s2 # 異常度
+th <- qchisq(0.99, 1) # カイ２分布による1%水準の閾値
+```
+
+```{r}
+plot(a, xlab="index", ylab="anormaly score") # 異常度のプロット
+```
+
+```{r}
+plot(a, xlab="index", ylab="anormaly score") # 異常度のプロット
+lines(0:200, rep(th, length(0:200)), col="red", lty=2) # 閾値の線
+```
+
+
+## 2.4 多変量正規分布に基づく異常検知
+
+実行例2.4 p42
+
+```{r}
+X <- cbind(Davis$weight, Davis$height) # データ行列
+plot(X[,1], X[,2], pch=16, xlab="weight", ylab="height")
+```
+
+実行例2.5 p43
+
+```{r}
+mx <- colMeans(X) # 標本平均
+Xc <- X -matrix(1, nrow(X), 1) %*% mx # 中心化したデータ行列
+Sx <- t(Xc) %*% Xc / nrow(X) #標本共分散行列
+a <- rowSums((Xc %*% solve(Sx))* Xc) # 異常度
+```
+
+```{r}
+plot(a, xlab="index", ylab="anormaly score") # 異常度のプロット
+```
+
+```{r}
+plot(a, xlab="index", ylab="anormaly score") # 異常度のプロット
+lines(0:200, rep(th, length(0:200)), col="red", lty=2) # 閾値の線
+```
+
+
