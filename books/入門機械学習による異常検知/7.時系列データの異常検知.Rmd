@@ -15,7 +15,7 @@ library(dplyr)
 library(ggplot2)
 ```
 
-# (a) 外れ値型
+### (a) 外れ値型
 
 ```{r}
 summary(rivers)
@@ -44,12 +44,12 @@ ggplot(df_river,aes(x=length)) + geom_histogram()
 ```
 
 
-# (b) 逸脱型
+### (b) 逸脱型
 
 TODO
 
 
-# (c) 変化点型(周波数変化データ)
+### (c) 変化点型(周波数変化データ)
 
 ```{r}
 set.seed(1)
@@ -79,7 +79,7 @@ ggplot(
 ```
 
 
-# (d) 複合型(心電図データ)
+### (d) 複合型(心電図データ)
 
 心電図データはこちらからダウンロード
 https://www.cs.ucr.edu/~eamonn/discords/
@@ -97,5 +97,192 @@ ggplot(
     y = V2
   )
 ) + geom_line()
+```
+
+## 7.1 近傍法による異常部位検出
+
+実行例7.1 p198
+
+```{r}
+# install.packages("FNN")
+library(FNN)
+X <- read.table(file="qtdbsel102.txt")
+```
+
+```{r}
+# 元データの心電図を描画
+plot(X[3001:6000,2], type="l")
+```
+
+```{r}
+# パラメータ(窓枠と近傍数)
+w <- 100
+nk <- 1
+# 訓練データの準備
+Xtr <- X[1:3000,2]
+Dtr <- embed(Xtr, w)
+# 検証データの準備
+X <- X[3001:6000,2]
+D <- embed(X, w)
+# 最近傍までの距離
+d <- knnx.dist(Dtr, D, k=nk)
+a <- d[,1]
+# 結果の図示
+plot(a, ylab="anormaly score", type="l")
+```
+
+## 7.2 特異スペクトル変換法
+
+実行例7.2 p203
+
+```{r}
+dt <- read.table(file="qtdbsel102.txt")
+xi <- dt[3001:6000,2]
+w <- 50 # スライド窓のサイズ
+m <- 2 # 特徴パターン数
+k <- w/2
+L <- k/2
+Tt <- length(xi) # 対象データのサイズ
+score <- rep(0, Tt)
+
+for(t in (w+k):(Tt-L+1)) {
+  # 左の行列の範囲
+  tstart <- t-w-k+1
+  tend <- t-1
+  # 部分時系列を並べた行列を作成
+  X1 <- t(embed(xi[tstart:tend],w))
+  X1 <- X1[w:1,]
+  
+  # 右の行列の範囲
+  tstart <- t-w-k+1+L
+  tend <- t-1+L
+  X2 <- t(embed(xi[tstart:tend],w))
+  X2 <- X2[w:1,]
+  
+  U1 <- svd(X1)$u[,1:m] # X1の特異値分解
+  U2 <- svd(X2)$u[,1:m] # X2の特異値分解
+  sig1 <- svd(t(U1) %*% U2)$d[1] # 部分空間同士の重なり合い
+  score[t] <- 1 - sig1^2 # 変化度の計算
+}
+```
+
+```{r}
+plot(score, ylab="change score", type="l")
+```
+
+実行例7.3 p204
+
+```{r}
+set.seed(1)
+tt <- 0.1
+x1 <- seq(0,10,by=tt)
+x2 <- seq(10.1,20,by=tt)
+x3 <- seq(20.2,30,by=tt)
+y1 <- sin(pi*x1) + rnorm(length(x1), sd=0.07)
+y2 <- sin(2*pi*x2) + rnorm(length(x2), sd=0.07)
+y3 <- sin(pi*x3) + rnorm(length(x3), sd=0.07)
+xi <- c(y1,y2,y3)
+```
+
+```{r}
+plot(xi, type="l")
+```
+
+```{r}
+w <- 50 # スライド窓のサイズ
+m <- 2 # 特徴パターン数
+k <- w/2
+L <- k/2
+Tt <- length(xi) # 対象データのサイズ
+score <- rep(0, Tt)
+
+for(t in (w+k):(Tt-L+1)) {
+  # 左の行列の範囲
+  tstart <- t-w-k+1
+  tend <- t-1
+  # 部分時系列を並べた行列を作成
+  X1 <- t(embed(xi[tstart:tend],w))
+  X1 <- X1[w:1,]
+  
+  # 右の行列の範囲
+  tstart <- t-w-k+1+L
+  tend <- t-1+L
+  X2 <- t(embed(xi[tstart:tend],w))
+  X2 <- X2[w:1,]
+  
+  U1 <- svd(X1)$u[,1:m] # X1の特異値分解
+  U2 <- svd(X2)$u[,1:m] # X2の特異値分解
+  sig1 <- svd(t(U1) %*% U2)$d[1] # 部分空間同士の重なり合い
+  score[t] <- 1 - sig1^2 # 変化度の計算
+}
+```
+
+```{r}
+plot(score, ylab="change score", type="l")
+```
+
+
+## 7.3 自己回帰モデルによる異常検知
+
+
+実行例 7.4 p211
+
+```{r}
+Dtr <- nottem[1:120]
+xi <- nottem[121:240]
+Tt <- length(xi)
+ar.model <- ar(Dtr)
+print(ar.model)
+```
+
+```{r}
+r <- ar.model$order
+alpha <- ar.model$ar
+xmean <- ar.model$x.mean
+sig2 <- ar.model$var.pred
+N <- Tt - r
+X <- t(embed(xi-xmean, r))[,1:N]
+ypred <- t(X) %*% alpha + xmean
+y <- xi[(1+r):Tt]
+a <- (y - as.numeric(ypred))^2/sig2
+```
+
+```{r}
+plot(xi, type="l")
+```
+
+```{r}
+plot(a, ylab="change score", type="l")
+```
+
+
+```{r}
+X<- read.table(file="qtdbsel102.txt")
+Dtr <- X[0:3000,2]
+xi <- X[3001:6000,2]
+Tt <- length(xi)
+ar.model <- ar(Dtr)
+print(ar.model)
+```
+
+
+```{r}
+r <- ar.model$order
+alpha <- ar.model$ar
+xmean <- ar.model$x.mean
+sig2 <- ar.model$var.pred
+N <- Tt - r
+X <- t(embed(xi-xmean, r))[,1:N]
+ypred <- t(X) %*% alpha + xmean
+y <- xi[(1+r):Tt]
+a <- (y - as.numeric(ypred))^2/sig2
+```
+
+```{r}
+plot(xi, type="l")
+```
+
+```{r}
+plot(a, ylab="change score", type="l")
 ```
 
