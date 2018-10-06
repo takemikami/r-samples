@@ -1,0 +1,47 @@
+---
+title: "3.5.機械学習"
+output: html_document
+---
+
+# 3.5 機械学習
+
+## 3.5.5 異常検知
+
+```{r}
+# サンプリング数、周波数
+sampling <- 1024
+freq <- 100
+rt <- 0:(sampling-1) / freq
+
+# 微弱ノイズとインパルスノイズの作成
+set.seed(1)
+weak_noise <- runif(sampling, min=-1/100, max=1/100)
+impulse_noise <- ifelse(runif(sampling) < 3/1000, 2, 0)
+
+# 波形の合成
+oData <- sin(1.0 * 2.0 * pi * rt) + weak_noise + impulse_noise
+
+# 対象信号のプロット
+plot(oData, type="l")
+```
+
+
+```{r}
+# h2oライブラリの読み込み
+# install.packages("h2o")
+library(h2o)
+
+# h2oサーバの起動
+localH20 <- h2o.init(ip="localhost", port=54321, startH2O=TRUE, nthreads = 1)
+
+# h2o用のデータを準備
+trainData <- as.h2o(oData)
+
+# 学習と予測
+model <- h2o.deeplearning(x = 1, training_frame = trainData, hidden=c(20,20), activation = 'TanhWithDropout', epochs = 100, autoencoder = T, ignore_const_cols = T)
+result <- h2o.anomaly(model, trainData)
+
+# 予測結果のプロット
+plot(c(1:1024), as.vector(result), type="l", xlab="n", ylab="estimation")
+```
+
