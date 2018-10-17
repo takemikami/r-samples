@@ -27,3 +27,17 @@ ps <- abs(fft(oData)^2)
 plot(ps, log="xy", type="h")
 ```
 
+
+
+```{r}
+#波形合成
+sampling <- 2048
+freq <- 1024
+rt <- 0:(sampling-1) / freq
+# 1.0, 10.0を変更するとパルスの位置が変わる
+oData <- sin(1.0 * 2.0 * pi * rt)
+# 対象信号のプロット
+plot(oData, type="l")
+```
+
+

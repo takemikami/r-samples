@@ -1,6 +1,9 @@
 ---
 title: "正規分布に従うデータからの異常検知"
-output: html_document
+#output: html_document
+output:
+  powerpoint_presentation:
+    reference_doc: reference.pptx
 ---
 
 ここでは、自身の学習用に以下の書籍に関連するRコードを記載しています
@@ -13,7 +16,7 @@ output: html_document
 実行例2.1 p24
 
 ```{r}
-install.packages("car")
+# install.packages("car")
 ```
 
 ```{r}
@@ -38,7 +41,7 @@ c(mu,s2)
 ```
 
 
-実行例2.3 p25
+# 実行例2.3 p25
 
 ```{r}
 a <- (Davis$weight-mu)^2/s2 # 異常度
@@ -48,6 +51,8 @@ th <- qchisq(0.99, 1) # カイ２分布による1%水準の閾値
 ```{r}
 plot(a, xlab="index", ylab="anormaly score") # 異常度のプロット
 ```
+
+----
 
 ```{r}
 plot(a, xlab="index", ylab="anormaly score") # 異常度のプロット

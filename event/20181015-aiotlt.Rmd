@@ -1,0 +1,88 @@
+---
+title: "AIoTLT-20181015"
+output: html_document
+---
+
+AIoTLT 20181015発表のサンプルコードです
+
+# k近傍法による外れ値検知
+
+プロット図
+
+```{r}
+library(dplyr)
+library(ggplot2)
+data <- iris %>% dplyr::select(Sepal.Length, Petal.Length)
+ggplot(
+ data,
+ aes(
+   x = Sepal.Length,
+   y = Petal.Length
+ )
+) + geom_point()
+```
+
+# 異常検知の例
+
+正常なデータ
+
+```{r}
+sampling <- 128
+freq <- 32
+rt <- 0:(sampling-1) / freq
+Xtr <- sin(1.0 * 2.0 * pi * rt) + sin(4.0 * 2.0 * pi * rt) # 適当な合成派
+plot(Xtr, type="l") # 対象信号のプロット
+```
+
+正常なデータの周波数解析
+
+```{r}
+plot(Mod(fft(Xtr))[1:(sampling/2)], type="l") # 離散フーリエ変換で周波数をプロット
+```
+
+異常なデータ
+(1/3〜2/3の部分を非合成波としている)
+
+```{r}
+sampling <- 128
+freq <- 32
+rt <- 0:(sampling-1) / freq
+oData1 <- sin(1.0 * 2.0 * pi * rt) + sin(4.0 * 2.0 * pi * rt)
+oData2 <- sin(1.0 * 2.0 * pi * rt)
+X <- c(oData1[1:(sampling/3)],
+       oData2[((sampling/3)+1):(sampling*2/3)],
+       oData1[((sampling*2/3)+1):sampling]) # 適当な合成波
+plot(X, type="l") # 対象信号のプロット
+```
+
+パラメータの設定・周波数解析関数の準備
+
+```{r}
+library(FNN)
+# パラメータ
+w <- 2 ^ 3 # 窓枠
+nk <- 1 # 近傍数
+# 周波数解析関数
+# x: 入力データ
+# w: 窓枠サイズ
+window_fft <- function(x, w) {
+  d <- embed(x, w) # 窓枠サイズで分割
+  dfft <- matrix(nrow=nrow(d), ncol=(w/2))
+  for(i in 1:nrow(d)) {
+    dfft[i,] <- Mod(fft(rev(d[i,])))[0:(w/2)] # FFTの実行
+  }
+  dfft
+}
+```
+
+```{r}
+# 訓練データの準備
+DtrFft <- window_fft(Xtr, w)
+# 検証データの準備
+DFft <- window_fft(X, w)
+# 最近傍までの距離
+d <- knnx.dist(DtrFft, DFft, k=nk)
+a <- d[,1]
+# 異常度の図示
+plot(a, ylab="anormaly score", type="l")
+```
