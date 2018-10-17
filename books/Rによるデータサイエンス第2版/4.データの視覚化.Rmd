@@ -1,0 +1,197 @@
+---
+title: "データの視覚化"
+output: html_document
+---
+
+# 4. データの視覚化
+
+## 4.1 棒グラフ p40
+
+```{r}
+VADeaths
+```
+
+```{r}
+barplot(VADeaths)
+```
+
+```{r}
+barplot(VADeaths, beside=TRUE)
+```
+
+```{r}
+barplot(VADeaths, beside=TRUE, col=c("lightblue", "mistyrose", "lightcyan", "lavender", "cornsilk"))
+```
+
+```{r}
+colors()
+```
+
+```{r}
+# install.packages("DAAG")
+library(MASS)
+library(DAAG)
+show.colors()
+```
+
+## 4.2 円グラフ p42
+
+```{r}
+sales <- c(15,20,25,10,30)
+names(sales) <- c("梨","林檎","葡萄","桃","その他")
+sales
+```
+
+```{r}
+pie(sales)
+```
+
+```{r}
+sales.col <- c("yellow", "green3", "purple", "violetred1", "cyan")
+pie(sales, col=sales.col, radius=1)
+```
+
+```{r}
+pie(sales, density=15, angle=15+10*1:5)
+```
+
+# 4.3 ヒストグラム p43
+
+```{r}
+hist(iris[1:50,2])
+```
+
+```{r}
+hist(iris[1:50,2], col="lightblue")
+```
+
+```{r}
+hist(iris[1:50,2], breaks=(1:5), col="blue")
+```
+
+## 4.5 折れ線グラフ p44
+
+```{r}
+matplot(VADeaths, type="l")
+```
+
+```{r}
+matplot(VADeaths, type="b")
+```
+
+```{r}
+RL <- nrow(VADeaths)
+CL <- ncol(VADeaths)
+matplot(VADeaths, type="b", pch=1:CL, ylab="", axes=FALSE)
+axis(1, 1:RL, rownames(VADeaths))
+axis(2)
+legend(1, max(VADeaths), colnames(VADeaths), col=1:CL, lty=1:CL)
+```
+
+## 4.5 箱ひげ図 p46
+
+```{r}
+op <- par(mfrow=c(1,2), mar=c(2.5,2,1,1))
+boxplot(iris[,1])
+boxplot(iris[,1]~iris[,5],col="lightblue")
+par(op)
+```
+
+
+## 4.5 散布図 p47
+
+### ２次元散布図 p47
+
+```{r}
+plot(iris[,1], iris[,3])
+```
+
+```{r}
+plot(iris[,1], iris[,3], type="n")
+text(iris[,1], iris[,3])
+```
+
+```{r}
+iris.label <- rep(c("S","C","V"), c(50,50,50))
+plot(iris[,1], iris[,3], type="n")
+text(iris[,1], iris[,3], iris.label)
+```
+
+```{r}
+plot(iris[,1], iris[,3], type="p", xlab="Length of Sepal", ylab="Length of Petal", cex=2, col="red")
+# identify(iris[,1],iris[,3])
+```
+
+```{r}
+plot(iris[,1], iris[,3], pch=21, cex=2, bg=c(2,3,4)[unclass(iris$Species)])
+```
+
+```{r}
+# install.packages("car")
+library(car)
+data(Prestige)
+attach(Prestige)
+names(Prestige)
+scatterplot(education, income)
+detach(Prestige)
+```
+
+
+### 対散布図(散布図行列) p52
+
+```{r}
+pairs(iris[1:4])
+```
+
+
+```{r}
+pairs(iris[1:4], pch=21, bg=c("red", "green3", "blue")[unclass(iris$Species)])
+```
+
+### 3次元グラフ p52
+
+```{r}
+# install.packages("scatterplot3d")
+library(scatterplot3d)
+scatterplot3d(iris[,2:4])
+```
+
+```{r}
+scatterplot3d(iris[,2:4], pch=c(1:3)[unclass(iris[,5])], color=unclass(iris[,5]))
+```
+
+```{r}
+iris.lab <- c(rep("S",50), rep("C",50), rep("V",50))
+scatterplot3d(iris[,2:4], pch=iris.lab, color=unclass(iris[,5]))
+```
+
+
+## 4.8 作図環境とグラフの利用 p55
+
+### 作図環境
+
+```{r}
+plot(iris[,1:2])
+op <- par(mar=c(8,6,4,2)) # 余白の設定
+plot(iris[,1:2])
+par(op)
+```
+
+```{r}
+op <- par(mfrow=c(2,2))
+plot(iris[,2], iris[,3])
+plot(iris[,2], iris[,4])
+boxplot(iris[,2]~iris[,5])
+boxplot(iris[,3]~iris[,5])
+par(op)
+```
+
+```{r}
+op <- par(mfrow=c(2,2), mar=c(4,1,1,1))
+plot(iris[,2], iris[,3])
+plot(iris[,2], iris[,4])
+boxplot(iris[,2]~iris[,5])
+boxplot(iris[,3]~iris[,5])
+par(op)
+```
+

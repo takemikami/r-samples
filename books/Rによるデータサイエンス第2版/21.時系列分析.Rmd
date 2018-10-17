@@ -1,0 +1,176 @@
+---
+title: "時系列分析"
+output: html_document
+---
+
+# 21. 時系列分析
+
+## 21.1 時系列分析の基本概念とデータの操作
+
+### 時系列データの形式と属性
+
+```{r}
+class(lh)
+```
+
+```{r}
+lh # 血液中の黄体ホルモンを10分間隔で測定したデータ
+```
+
+```{r}
+start(UKgas)
+end(UKgas)
+frequency(UKgas)
+UKgas # イギリスのガス消費量を四半期ごとに観測したデータ
+```
+
+```{r}
+window(UKgas, c(1975,2), c(1979,3))
+```
+
+### 時系列データの図示
+
+```{r}
+op <- par(mfrow=c(2,1), mar=c(4.5,4,1,1))
+ts.plot(lh)
+ts.plot(UKgas)
+par(op)
+```
+
+```{r}
+ts.plot(ldeaths, mdeaths, fdeaths, gpars=list(xlab="年", ylab="死亡数", lty=c(1:3), col=c(1:3)))
+legend(1977, 4000, c("全体","男性", "女性"),lty=c(1:3),col=c(1:3))
+```
+
+### データオブジェクトの作成 p272
+
+```{r}
+temp <- ts(1:120, start=c(1995,6), frequency=12)
+class(temp)
+```
+
+```{r}
+temp
+```
+
+### ラグ処理 p272
+
+```{r}
+ldeaths
+```
+
+```{r}
+stats::lag(ldeaths, k=5)
+```
+
+
+### 差分 p273
+
+```{r}
+plot(diff(UKgas))
+```
+
+
+## 21.2 自己共分散と自己相関 p274
+
+```
+acf(x, type=c("correlation", "covariance", "partial", plot = TRUE, ...))
+```
+
+```{r}
+acf(UKgas)
+```
+
+```{r}
+op <- par(mai=rep(0.25,4), mfrow=c(4,1))
+for(i in 1:4) {
+  plot(diff(log(UKgas), lag=i))
+}
+par(op)
+```
+
+```{r}
+ccf(mdeaths, fdeaths)
+```
+
+## 21.3 スペクトル分析 p276
+
+```{r}
+op <- par(mfrow=c(2,2), mar=c(5,4,4,2))
+spec.pgram(UKgas)
+spec.pgram(UKgas, spans=c(3,3))
+spec.pgram(ldeaths)
+spec.pgram(ldeaths, spans=c(3,3))
+par(op)
+```
+
+```{r}
+op <- par(mfrow=c(1,2))
+spectrum(UKgas, method="ar")
+spectrum(ldeaths, method="ar")
+par(op)
+```
+
+## 21.4 ランダムウォークと単位根 p278
+
+```{r}
+PP.test(lh)
+```
+
+```{r}
+# install.packages("tseries")
+library(tseries)
+adf.test(UKgas)
+```
+
+```{r}
+adf.test(diff(UKgas))$p.value
+```
+
+## 21.5 ARモデル p279
+
+### 関数arとモデルの推定 p280
+
+```
+ar(x, aic=TRUE, method="", order.max = NULL, ...)
+```
+
+```{r}
+(lh.ar <- ar(lh))
+```
+
+```{r}
+summary(lh.ar)
+```
+
+```{r}
+lh.ar$order
+```
+
+```{r}
+round(lh.ar$ar, 3)
+```
+
+### 関数arとモデルの推定 p281
+
+```{r}
+Box.test(lh.ar$res, type="Ljung")
+```
+
+```{r}
+temp <- window(lh.ar$res, start=4)
+jarque.bera.test(temp)
+```
+
+### 予測 p281
+
+```{r}
+(lh.pr <- predict(lh.ar, n.ahead = 10))
+```
+
+```{r}
+SE1 <- lh.pr$pred + 2*lh.pr$se
+SE2 <- lh.pr$pred - 2*lh.pr$se
+ts.plot(lh, lh.pr$pred, SE1, SE2, gpars=list(lt=c(1,2,3,3),col=c(1,2,4,4)))
+legend(46, 2.1, c("実測値","予測値","2*SE"), lty=c(1,2,3), col=c(1,2,4))
+```

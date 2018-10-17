@@ -1,0 +1,175 @@
+---
+title: "データの入出力と編集"
+output: html_document
+---
+
+# 2. データの入出力と編集
+
+## 2.1 直接入力
+
+### ベクトル p15
+
+```{r}
+sales <- c(15,20,25,10,30)
+```
+
+
+```{r}
+sales <- c(15,20,25,10,30)
+sales = c(15,20,25,10,30)
+assign("sales", c(15,20,25,10,30))
+c(15,20,25,10,30) -> sales
+```
+
+```{r}
+length(sales)
+```
+
+```{r}
+fruits <- c("梨","林檎","葡萄","桃","その他")
+```
+
+```{r}
+names(sales) <- fruits
+sales
+```
+
+### 行列 p16
+
+```{r}
+sales2 <- matrix(0,2,5)
+```
+
+```{r}
+sales2[1,] <- c(15,20,25,10,30)
+```
+
+```{r}
+sales2[2,] <- c(10,25,20,25,20)
+sales2
+```
+
+```{r}
+dim(sales2)
+```
+
+```{r}
+nrow(sales2)
+```
+
+```{r}
+ncol(sales2)
+```
+
+```{r}
+sales2[2,3]
+```
+
+```{r}
+(sales2[2,3]<-30)
+```
+
+```{r}
+sales2[2,3]<-20
+```
+
+```{r}
+colnames(sales2) <- fruits
+rownames(sales2) <- c("A","B")
+sales2
+```
+
+### データフレーム p18
+
+```{r}
+DF1 <- data.frame(cbind(LETTERS[1:4],3:0))
+colnames(DF1) <- c("あ","い")
+DF1
+```
+
+```{r}
+as.matrix(DF1)
+```
+
+### 配列 p19
+
+```{r}
+(AR1<-array(1:30, c(2,5,3)))
+```
+
+### リスト p20
+
+```{r}
+L1 <- list(c(1:8), c("A","B"), matrix(1:12,2,6))
+L1
+```
+
+### データ形式の確認
+
+```{r}
+class(sales)
+```
+
+```{r}
+class(sales2)
+```
+
+```{r}
+class(DF1)
+```
+
+```{r}
+class(L1)
+```
+
+
+```{r}
+is.vector(sales)
+```
+
+## 2.5 データの結合と並び替え
+
+### データの結合 p26
+
+```{r}
+rbind(sales2, c(20,30,15,20,15))
+```
+
+```{r}
+A <- matrix(c(1,2,1,4),2,2)
+B <- matrix(c(4,2,3,4),2,2)
+cbind(A,B)
+```
+
+```{r}
+rbind(A,B)
+```
+
+### データの並べ替え p27
+
+```{r}
+sort(c(3,2,4,1))
+```
+
+```{r}
+rev(c(3,2,4,1))
+```
+
+```{r}
+sales2[,sort.list(sales2[1,])]
+```
+
+## 1.6 データの尺度と表記
+
+```{r}
+iris
+```
+
+```{r}
+dim(iris)
+```
+
+```{r}
+summary(iris)
+```
+
