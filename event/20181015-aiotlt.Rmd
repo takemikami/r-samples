@@ -5,6 +5,9 @@ output: html_document
 
 AIoTLT 20181015発表のサンプルコードです
 
+発表資料: 「センサーによるデータ計測と異常検知の基本」
+https://www.slideshare.net/takemikami/ss-119481647
+
 # k近傍法による外れ値検知
 
 プロット図
