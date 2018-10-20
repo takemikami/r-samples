@@ -1,0 +1,67 @@
+---
+title: "4.変化点検出"
+output: html_document
+---
+
+# 4. 変化点検出
+
+## 4.3. 変化点検出エンジン ChangeFinder
+
+```{r}
+# SDAR オンライン忘却学習アルゴリズム関数の定義
+# x: データ
+# order: 次数
+# discount: 忘却率
+sdar_train <- function(x, order, discount) {
+  mu_hat <- 0 # 平均値の初期値
+  ac <- rep(0, length=order+1) # 自己共分散の初期値
+  x_hat <- rep(0, length=length(x))
+  score <- rep(0, length=length(x))
+  for(t in (1+order):length(x)) {
+
+    # 平均値を忘却率で更新    
+    mu_hat <- (1-discount) * mu_hat + discount * x[t]
+    
+    # 自己共分散の算出し、忘却率で更新
+    ac <- (1-discount) * ac + discount * (x[t] - mu_hat) * (x[(t):(t-order)] - mu_hat)
+    
+    # ユールウォーカーの方程式を解く(ARモデルの係数を求める)
+    co_matrix <- matrix(ac[abs(rep(1:order, order)-rep(1:order, each=order))+1], nrow=order, ncol=order)
+    w <- solve(co_matrix) %*% ac[-1]
+
+    # 推定値を計算する
+    x_hat[t] <- sum((w * (x[(t-1):(t-order)] - mu_hat))) + mu_hat
+    
+    # ヘリンジャースコアの計算
+    score[t] <- Re(sqrt(sum((sqrt(complex(real=x[t])) -  sqrt(complex(real=x_hat[t]))) ^2)))
+  }
+  score
+}
+
+# 平滑化用関数の定義
+# x: データ
+# width: 移動平均の窓サイズ
+smoothing <- function(x, width) {
+  w <- floor(width / 2)
+  smoothing_score <- rep(0, length=length(x))
+  for(t in w:length(x)) {
+    smoothing_score[t] <- sum(x[(t-w):(t+w)])/(w*2)
+  }
+  smoothing_score
+}
+
+# 対象データの準備
+data <- rivers
+# 対象データの図示
+plot(data, type="l")
+
+# ChangeFinderによる変化点検値の実施
+# Step1. データ時系列モデルの忘却学習
+step1_out <- sdar_train(data, 10, 0.01)
+# Step2. スコアの平滑化
+step2_out <- smoothing(step1_out, 7)
+# Step3. スコア時系列モデルの忘却学習
+step3_out <- sdar_train(step2_out, 10, 0.01)
+# 変化点検知結果の図示
+plot(step3_out, type="l")
+```
