@@ -1,0 +1,64 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+ここでは、自身の学習用に以下の書籍に関連するRコードを記載しています
+金明哲「テキストアナリティクス」岩波書店 5章 テキストの特徴分析
+
+```{r}
+# install
+install.packages("psych")
+install.packages("FactoMineR")
+```
+
+```{r}
+# path <- "http://mjin.doshisha.ac.jp/data/sakubun3f.csv"
+sakubun <- read.csv("./sakubun3f.csv", row.names=1)
+sakubun2 <- sakubun[,-32]
+```
+
+```{r}
+library(psych)
+fa.parallel(sakubun2, fa="pc")
+```
+
+
+```{r}
+library(FactoMineR)
+par(family = "HiraKakuProN-W3")
+pca <- PCA(sakubun2)
+```
+
+```{r}
+round(pca$eig, 3)
+```
+
+
+
+```{r}
+ki <- round(pca$eig[1:2,2],2)
+par(family = "HiraKakuProN-W3")
+biplot(pca$ind$coord, pca$var$coord,
+       xlab=paste("PCA_1(", ki[1], "%)"),
+        ylab=paste("PCA_2(", ki[2], "%)"))
+```
+
+
+```{r}
+X <- sakubun/apply(sakubun,1,sum)
+par(family = "HiraKakuProN-W3")
+pca <- PCA(X[,-32],scale.unit=FALSE)
+```
+
+
+```{r}
+ki <- round(pca$eig[1:2,2],2)
+par(family = "HiraKakuProN-W3")
+biplot(pca$ind$coord, pca$var$coord,
+       xlab=paste("PCA_1(", ki[1], "%)"),
+        ylab=paste("PCA_2(", ki[2], "%)"))
+```
+
+
+

@@ -1,0 +1,49 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+ここでは、自身の学習用に以下の書籍に関連するRコードを記載しています
+金明哲「テキストアナリティクス」岩波書店 3章 テキストデータの視覚化
+
+```{r}
+# install
+install.packages("igraph")
+```
+
+```{r}
+library(igraph)
+# data.path <- "http://mjin.doshisha.ac.jp/data/anketo.csv"
+data3 <- read.csv("anketo.csv")
+head(data3)
+```
+
+```{r}
+g <- graph.data.frame(data3)
+plot(g, vertex.size=2, edge.arrow.size=0.2, vertex.label="")
+```
+
+
+```{r}
+# 図3.11の作成
+E(g)$weight <- data3[,3]
+sort(degree(g), decreasing=TRUE)[1:3]
+```
+
+
+```{r}
+# 頂点の番号を取り出す
+li <- sort.list(degree(g), decreasing=TRUE)[1:3]
+ng <- neighborhood(g,1,li)[[1]]
+motto <- induced.subgraph(g, ng)
+plot(motto, vertex.size=1, edge.arrow.size=0.5,
+     edge.label=E(g)$weight)
+```
+
+```{r}
+gakuhi <- induced.subgraph(g, neighborhood(g,3,1)[[1]])
+tkplot(gakuhi, vertex.size=1, edge.arrow.size=0.5,
+       edge.label=E(g)$wight, vertex.label.cex=1.2)
+```
+
+
